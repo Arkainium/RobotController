@@ -1,0 +1,48 @@
+/*
+ * Observation.cpp
+ *
+ *  Created on: Jan 13, 2009
+ *      Author: Geotty
+ */
+
+#include <math.h>
+#include "Utils.h"
+#include "Observation.h"
+
+#include <iostream>
+
+double Observation::calculateLikelihoodForPosition(Position position) const {
+	vector<MapMarker> markers = map->getMarkerById(markerId);
+
+	double probability = 0;
+
+	for (int i = 0; i < markers.size(); i++) {
+		double likelihood = calculateLikelihoodForMarkerAndPosition(markers[i],
+				position);
+
+		if (likelihood > probability)
+			probability = likelihood;
+	}
+
+	return probability;
+}
+
+double Observation::calculateLikelihoodForMarkerAndPosition(MapMarker marker,
+		Position position) const {
+
+	double expectedBearing = marker.getBearing(position);
+	double deltaAngle = fabs((double) (bearing - expectedBearing));
+
+	if (deltaAngle < PI * .003)
+		return 1;
+	if (deltaAngle < PI * .006)
+		return .9;
+	if (deltaAngle < PI * .008)
+		return .6;
+	if (deltaAngle < PI * .012)
+		return .4;
+	else
+		return 0;
+
+}
+
